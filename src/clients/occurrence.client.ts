@@ -5,9 +5,15 @@ import { OCCURRENCES_API_HOST } from '../env'
 import OccurrenceData from '../data-types/occurrence-data';
 import SessionData from '../data-types/session-data';
 
-interface AuthenticateOpt {
+interface AuthenticateArgs {
   email: string;
   password: string;
+}
+
+interface OccurrenceArgs {
+  code: string;
+  description: string;
+  registerAt: string;
 }
 
 interface OccurrenceClientDependencies {
@@ -24,10 +30,21 @@ class OccurrenceClient {
   authenticate({
     email,
     password,
-  }: AuthenticateOpt): Observable<HttpResponse<SessionData, Headers>> {
+  }: AuthenticateArgs): Observable<HttpResponse<SessionData, Headers>> {
     return this.httpClient.post({
       url: `${OCCURRENCES_API_HOST}/users/sessions`,
       body: { email, password }
+    });
+  }
+
+  create({
+    code,
+    description,
+    registerAt,
+  }: OccurrenceArgs): Observable<HttpResponse<OccurrenceData, Headers>> {
+    return this.httpClient.post({
+      url: `${OCCURRENCES_API_HOST}/occurrences`,
+      body: { code, description, registerAt }
     });
   }
 

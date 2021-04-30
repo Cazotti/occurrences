@@ -12,17 +12,13 @@ interface Props extends Omit<RouteProps, 'component'> {
 const PrivateRoute = ({ component: Component }: Props) => {
   const dispatch = useDispatch();
   const authService = getAuthService();
+  const token = authService.getToken();
 
   useEffect(() => {
-    const token = authService.getToken();
-    if (token) {
-      dispatch(loadTokenAction(token));
-    }
-  }, []);
+    if (token) dispatch(loadTokenAction(token));
+  }, [dispatch, token]);
 
-  const { isAuthenticated } = useSelector(
-    ({ auth }: { auth: AuthState }) => auth
-  );
+  const { isAuthenticated } = useSelector( ({ auth }: { auth: AuthState }) => auth );
 
   return (
     <Route render={(props) => {

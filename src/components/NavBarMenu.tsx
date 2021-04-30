@@ -9,9 +9,11 @@ export default function NavBarMenu () {
   return (
     <div className='nav-bar-header'>
       <h2>Occurrences</h2>
-      <Button aria-controls="simple-menu" aria-haspopup="true" onClick={
-        () => disptach(signOutAction())}>
-        Logout
+      <Button
+        aria-controls="simple-menu"
+        aria-haspopup="true"
+        onClick={() => disptach(signOutAction())}
+      > Logout
       </Button>
     </div>
   )

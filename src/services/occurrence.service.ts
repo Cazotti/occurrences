@@ -11,6 +11,18 @@ export class OccurrenceService {
     this.occurrenceClient = occurrenceClient;
   }
 
+  create({
+    code,
+    description,
+    registerAt
+  }: {
+    code: string;
+    description: string;
+    registerAt: string;
+  }): Observable<HttpResponse<OccurrenceData, Headers>> {
+    return this.occurrenceClient.create({ code, description, registerAt });
+  }
+
   listAll(): Observable<HttpResponse<OccurrenceData[], Headers>> {
     return this.occurrenceClient.listAll();
   }

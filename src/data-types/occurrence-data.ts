@@ -1,6 +1,6 @@
 export default interface OccurrenceData {
-  code: number;
+  code: string;
   description: string;
   id: number;
-  registerAt: Date;
+  registerAt: string;
 }

@@ -33,7 +33,31 @@ interface OccurrencesListFailureAction extends Action<typeof OccurrenceTypes.LIS
 }
 const occurrencesListFailureAction = (error: OccurrenceErrorAttributes): OccurrencesListFailureAction => ({
   type: OccurrenceTypes.LIST_OCCURRENCES_FAILURE,
-  payload: { message: OccurrenceError(error)}
+  payload: { message: OccurrenceError(error)},
+});
+
+interface OccurrenceCreateRequestAction extends Action<typeof OccurrenceTypes.CREATE_OCCURRENCE_REQUEST> {
+  payload: Omit<OccurrenceData, 'id'>
+}
+export const occurrenceCreateRequestAction = (occurrence: Omit<OccurrenceData, 'id'>): OccurrenceCreateRequestAction => ({
+  type: OccurrenceTypes.CREATE_OCCURRENCE_REQUEST,
+  payload: occurrence,
+});
+
+interface OccurrenceCreateSuccessAction extends Action<typeof OccurrenceTypes.CREATE_OCCURRENCE_SUCCESS> {
+  payload: OccurrenceData;
+}
+const occurrenceCreateSuccessAction = (occurrence: OccurrenceData): OccurrenceCreateSuccessAction => ({
+  type: OccurrenceTypes.CREATE_OCCURRENCE_SUCCESS,
+  payload: occurrence,
+});
+
+interface OccurrenceCreateFailureAction extends Action<typeof OccurrenceTypes.CREATE_OCCURRENCE_FAILURE> {
+  payload: { message: String }
+}
+const occurrenceCreateFailureAction = (error: OccurrenceErrorAttributes): OccurrenceCreateFailureAction => ({
+  type: OccurrenceTypes.CREATE_OCCURRENCE_FAILURE,
+  payload: { message: OccurrenceError(error)},
 });
 
 const occurrencesListEpic: AppEpic<
@@ -50,7 +74,24 @@ const occurrencesListEpic: AppEpic<
     ),
   )
 
-export const occurrenceEpic = combineEpics<AppEpic>( occurrencesListEpic );
+const occurrenceCreateEpic: AppEpic<
+  OccurrenceCreateFailureAction | OccurrenceCreateRequestAction | OccurrenceCreateSuccessAction,
+  OccurrenceCreateFailureAction | OccurrenceCreateSuccessAction
+> = (action$, _, { occurrenceService }: {occurrenceService: OccurrenceService}) =>
+  action$.pipe(
+    filter(isOfType(OccurrenceTypes.CREATE_OCCURRENCE_REQUEST)),
+    switchMap((action) =>
+      occurrenceService.create(action.payload).pipe(
+        map((res) => occurrenceCreateSuccessAction(res.body)),
+        catchError((err) => of(occurrenceCreateFailureAction(err))),
+      )
+    ),
+  )
+
+export const occurrenceEpic = combineEpics<AppEpic>(
+  occurrencesListEpic,
+  (occurrenceCreateEpic as any) as AppEpic,
+);
 
 const initialState: OccurrenceState = {
   error: undefined,
@@ -60,21 +101,39 @@ const initialState: OccurrenceState = {
 export const occurrenceReducer = (
   state: OccurrenceState = initialState,
   action:
-    | OccurrencesListRequestAction
+    | OccurrenceCreateFailureAction
+    | OccurrenceCreateRequestAction
+    | OccurrenceCreateSuccessAction
     | OccurrencesListFailureAction
+    | OccurrencesListRequestAction
     | OccurrencesListSuccessAction
 ) => {
   switch (action.type) {
-    case OccurrenceTypes.LIST_OCCURRENCES_REQUEST:
+    case OccurrenceTypes.CREATE_OCCURRENCE_FAILURE:
       return {
         ...state,
-        data: [],
+        error: action.payload,
+      };
+    case OccurrenceTypes.CREATE_OCCURRENCE_REQUEST:
+      return {
+        ...state,
+        error: undefined,
+      };
+    case OccurrenceTypes.CREATE_OCCURRENCE_SUCCESS:
+      return {
+        ...state,
+        data: [ ...state.data, action.payload ],
         error: undefined,
       };
     case OccurrenceTypes.LIST_OCCURRENCES_FAILURE:
       return {
         ...state,
         error: action.payload,
+      };
+    case OccurrenceTypes.LIST_OCCURRENCES_REQUEST:
+      return {
+        ...state,
+        error: undefined,
       };
     case OccurrenceTypes.LIST_OCCURRENCES_SUCCESS:
       return {

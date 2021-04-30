@@ -10,23 +10,16 @@ import LoginPage from '../pages/LoginPage/LoginPage';
 const LoginRoute = () => {
   const dispatch = useDispatch();
   const authService = getAuthService();
+  const token = authService.getToken()
 
   useEffect(() => {
-    const token = authService.getToken()
-    if (token) {
-      dispatch(loadTokenAction(token));
-    }
-  }, []);
+    if (token) dispatch(loadTokenAction(token));
+  }, [token, dispatch]);
 
-  const { isAuthenticated } = useSelector(
-    ({ auth }: { auth: AuthState }) => auth,
-  );
+  const { isAuthenticated } = useSelector( ({ auth }: { auth: AuthState }) => auth );
 
-  if (isAuthenticated) {
-    return <Redirect to="/occurrenceForm" />;
-  } else  {
-    return <LoginPage />;
-  }
+  if (isAuthenticated)  return <Redirect to="/occurrenceForm" />;
+  else return <LoginPage />;
 };
 
 export default LoginRoute;
