@@ -1,4 +1,4 @@
 export * from './http.client';
-export * from './http-client-super-agent.adapter';
+export * from './http-client-axios.adapter';
 
 export { HttpClient as default } from './http.client';

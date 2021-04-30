@@ -1,8 +1,9 @@
 import { Observable } from 'rxjs';
 
 import { HttpClient, HttpResponse } from './http-client';
-import SessionData from '../data-types/session-data';
 import { OCCURRENCES_API_HOST } from '../env'
+import OccurrenceData from '../data-types/occurrence-data';
+import SessionData from '../data-types/session-data';
 
 interface AuthenticateOpt {
   email: string;
@@ -20,13 +21,19 @@ class OccurrenceClient {
     this.httpClient = httpClient;
   }
 
-  signIn({
+  authenticate({
     email,
     password,
   }: AuthenticateOpt): Observable<HttpResponse<SessionData, Headers>> {
     return this.httpClient.post({
       url: `${OCCURRENCES_API_HOST}/users/sessions`,
       body: { email, password }
+    });
+  }
+
+  listAll(): Observable<HttpResponse<OccurrenceData[], Headers>> {
+    return this.httpClient.get({
+      url: `${OCCURRENCES_API_HOST}/occurrences`,
     });
   }
 }

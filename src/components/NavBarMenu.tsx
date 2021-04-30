@@ -1,8 +1,7 @@
 import { Button } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 
-import { AuthTypes } from '../enums/auth-types.enum';
-import './NavBarMenu.style.css';
+import { signOutAction } from '../redux/auth';
 
 export default function NavBarMenu () {
   const disptach = useDispatch();
@@ -11,7 +10,7 @@ export default function NavBarMenu () {
     <div className='nav-bar-header'>
       <h2>Occurrences</h2>
       <Button aria-controls="simple-menu" aria-haspopup="true" onClick={
-        () => disptach({ type: AuthTypes.SIGN_OUT_REQUEST })}>
+        () => disptach(signOutAction())}>
         Logout
       </Button>
     </div>

@@ -4,10 +4,6 @@ import { HttpResponse } from '../clients/http-client';
 import OccurrenceClient from '../clients/occurrence.client';
 import SessionData from '../data-types/session-data';
 
-export interface SessionAdapter {
-  destroy(): Observable<void>;
-}
-
 export class AuthService {
   private occurrenceClient: OccurrenceClient;
 
@@ -22,16 +18,7 @@ export class AuthService {
     email: string;
     password: string;
   }): Observable<HttpResponse<SessionData, Headers>> {
-    const client = this.occurrenceClient;
-    return client.signIn({ email, password });
-  }
-
-  signOut(): Observable<void> {
-    return of(localStorage.removeItem('Token'));
-  }
-
-  setTokenToLocalStorage(token: string): void {
-    localStorage.setItem('Token', token);
+    return this.occurrenceClient.authenticate({ email, password });
   }
 
   getToken(): string | null {
@@ -43,6 +30,14 @@ export class AuthService {
       return true;
     }
     return false;
+  }
+
+  signOut(): Observable<void> {
+    return of(localStorage.removeItem('Token'));
+  }
+
+  setTokenToLocalStorage(token: string): void {
+    localStorage.setItem('Token', token);
   }
 }
 

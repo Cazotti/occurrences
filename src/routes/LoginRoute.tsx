@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 import { AuthState, loadTokenAction } from '../redux/auth';
 import { getAuthService } from '../initializer';
-import LoginPage from '../pages/LoginPage';
+import LoginPage from '../pages/LoginPage/LoginPage';
 
 const LoginRoute = () => {
   const dispatch = useDispatch();

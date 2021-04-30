@@ -5,10 +5,12 @@ import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
 import { authReducer, authEpic } from './auth';
-import { getAuthService } from '../initializer';
+import { getAuthService, getOccurrenceService } from '../initializer';
+import { occurrenceReducer, occurrenceEpic } from './occurrences';
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  occurrence: occurrenceReducer,
 });
 export type RootReducer = typeof rootReducer;
 
@@ -20,6 +22,7 @@ export type RootState = ReturnType<typeof rootReducer>;
 
 const epicDependencies = {
   authService: getAuthService(),
+  occurrenceService: getOccurrenceService(),
 };
 export type AppEpicDependencies = typeof epicDependencies;
 
@@ -31,6 +34,7 @@ export type AppEpic<
 const rootEpic: AppEpic = (action$, state$, dep) =>
   combineEpics<AppEpic>(
     authEpic,
+    occurrenceEpic,
   )(action$, state$, dep).pipe(
     catchError((error: Error) => {
       return throwError(error);

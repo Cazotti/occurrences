@@ -24,9 +24,7 @@ interface SignInRequestParams {
 interface SignInRequestAction extends Action<typeof AuthTypes.SIGN_IN_REQUEST> {
   payload: SignInRequestParams;
 }
-export const signInRequestAction = (
-  params: SignInRequestParams,
-): SignInRequestAction => ({
+export const signInRequestAction = (params: SignInRequestParams): SignInRequestAction => ({
   type: AuthTypes.SIGN_IN_REQUEST,
   payload: params
 });

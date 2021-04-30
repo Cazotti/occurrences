@@ -2,26 +2,21 @@ import React, { useState, ChangeEvent } from 'react';
 import { TextField, Button } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { AuthState } from '../redux/auth';
-import { AuthTypes } from '../enums/auth-types.enum';
-import './LoginForm.style.css';
+import { AuthState, signInRequestAction } from '../redux/auth';
 
 export default function Login () {
-  const [email, setEmail] = useState<String>("");
-  const [password, setPassword] = useState<String>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const { error } = useSelector(({ auth }: { auth: AuthState }) => auth);
 
-  const disptach = useDispatch();
+  const dispatch = useDispatch();
 
   return (
-    <main>
+    <main className='main-login'>
       {error && <p>{error.message}</p>}
       <form onSubmit={e => {
         e.preventDefault();
-        disptach( {
-          type: AuthTypes.SIGN_IN_REQUEST,
-          payload: { email: email, password: password },
-        } );
+        dispatch( signInRequestAction( {email, password} ) );
       } }>
         <TextField
           variant="outlined"

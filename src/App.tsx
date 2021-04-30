@@ -5,7 +5,7 @@ import { Switch, BrowserRouter as Router, Route} from 'react-router-dom';
 import configureStore from './redux/store';
 import LoginRoute from './routes/LoginRoute';
 import PrivateRoute from './routes/PrivateRoute';
-import OccurrencePage from './pages/OccurrencesPage';
+import OccurrencePage from './pages/OccurrencePage/OccurrencesPage';
 
 const store = configureStore();
 

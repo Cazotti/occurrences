@@ -18,11 +18,14 @@ type Headers = any;
 
 export interface HttpResponse<Body, Headers> {
   body: Body;
-  status: number;
   headers: Headers;
+  status: number;
 }
 
 export interface HttpClientAdapter {
+  get(
+    opt: HttpRequestArgs,
+  ): Observable<HttpResponse<Body, Headers>>;
   post(
     opt: HttpRequestArgs,
   ): Observable<HttpResponse<Body, Headers>>;
@@ -37,6 +40,12 @@ export class HttpClient {
 
   constructor({ adapter }: HttpClientDependencies) {
     this.adapter = adapter;
+  }
+
+  get<Body, Headers>(
+    args: HttpRequestArgs,
+  ): Observable<HttpResponse<Body, Headers>> {
+    return this.makeRequest('GET', args);
   }
 
   post<Body, Headers>(
@@ -54,6 +63,9 @@ export class HttpClient {
     switch (method) {
       case 'POST':
         request = this.adapter.post(args);
+        break;
+      case 'GET':
+        request = this.adapter.get(args);
         break;
       default:
         throw Error(`Unknown method HTTP method '${method}'`);
