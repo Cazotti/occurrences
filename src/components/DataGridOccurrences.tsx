@@ -10,7 +10,9 @@ export default function TableOccurrences ({ setOccurrenceSelect }: any) {
   const { data } = useSelector(({ occurrence }: { occurrence: OccurrenceState }) => occurrence);
   const dispatch = useDispatch();
 
-  useEffect(() => { dispatch(occurrencesListRequestAction()) }, [dispatch]);
+  useEffect(() => {
+    dispatch(occurrencesListRequestAction())
+  }, [dispatch]);
 
   const rows = data.map((d) => {
     return {

@@ -84,6 +84,30 @@ const occurrenceUpdateFailureAction = (error: OccurrenceErrorAttributes): Occurr
   payload: { message: OccurrenceError(error)},
 });
 
+interface OccurrenceDeleteRequestAction extends Action<typeof OccurrenceTypes.DELETE_OCCURRENCE_REQUEST> {
+  payload: OccurrenceData['id'],
+}
+export const occurrenceDeleteRequestAction = (occurrence: OccurrenceData['id']): OccurrenceDeleteRequestAction => ({
+  type: OccurrenceTypes.DELETE_OCCURRENCE_REQUEST,
+  payload: occurrence,
+});
+
+interface OccurrenceDeleteSuccessAction extends Action<typeof OccurrenceTypes.DELETE_OCCURRENCE_SUCCESS> {
+  payload: OccurrenceData['id'],
+}
+export const occurrenceDeleteSuccessAction = (occurrenceId: OccurrenceData['id']): OccurrenceDeleteSuccessAction => ({
+  type: OccurrenceTypes.DELETE_OCCURRENCE_SUCCESS,
+  payload: occurrenceId
+});
+
+interface OccurrenceDeleteFailureAction extends Action<typeof OccurrenceTypes.DELETE_OCCURRENCE_FAILURE> {
+  payload: { message: String },
+}
+const occurrenceDeleteFailureAction = (error: OccurrenceErrorAttributes): OccurrenceDeleteFailureAction => ({
+  type: OccurrenceTypes.DELETE_OCCURRENCE_FAILURE,
+  payload: { message: OccurrenceError(error)},
+});
+
 const occurrenceCreateEpic: AppEpic<
   OccurrenceCreateFailureAction | OccurrenceCreateRequestAction | OccurrenceCreateSuccessAction,
   OccurrenceCreateFailureAction | OccurrenceCreateSuccessAction
@@ -94,6 +118,20 @@ const occurrenceCreateEpic: AppEpic<
       occurrenceService.create(action.payload).pipe(
         map((res) => occurrenceCreateSuccessAction(res.body)),
         catchError((err) => of(occurrenceCreateFailureAction(err))),
+      ),
+    ),
+  );
+
+const occurrenceDeleteEpic: AppEpic<
+  OccurrenceDeleteFailureAction | OccurrenceDeleteRequestAction | OccurrenceDeleteSuccessAction,
+  OccurrenceDeleteFailureAction | OccurrenceDeleteSuccessAction
+> = (action$, _, { occurrenceService }: {occurrenceService: OccurrenceService}) =>
+  action$.pipe(
+    filter(isOfType(OccurrenceTypes.DELETE_OCCURRENCE_REQUEST)),
+    switchMap((action) =>
+      occurrenceService.delete(action.payload).pipe(
+        map(() => occurrenceDeleteSuccessAction(action.payload)),
+        catchError((err) => of(occurrenceDeleteFailureAction(err))),
       ),
     ),
   );
@@ -128,6 +166,7 @@ const occurrenceUpdateEpic: AppEpic<
 
 export const occurrenceEpic = combineEpics<AppEpic>(
   (occurrenceCreateEpic as any) as AppEpic,
+  (occurrenceDeleteEpic as any) as AppEpic,
   occurrencesListEpic,
   (occurrenceUpdateEpic as any) as AppEpic,
 );
@@ -143,6 +182,9 @@ export const occurrenceReducer = (
     | OccurrenceCreateFailureAction
     | OccurrenceCreateRequestAction
     | OccurrenceCreateSuccessAction
+    | OccurrenceDeleteFailureAction
+    | OccurrenceDeleteRequestAction
+    | OccurrenceDeleteSuccessAction
     | OccurrencesListFailureAction
     | OccurrencesListRequestAction
     | OccurrencesListSuccessAction
@@ -152,11 +194,17 @@ export const occurrenceReducer = (
 ) => {
   switch (action.type) {
     case OccurrenceTypes.CREATE_OCCURRENCE_FAILURE:
+    case OccurrenceTypes.LIST_OCCURRENCES_FAILURE:
+    case OccurrenceTypes.UPDATE_OCCURRENCE_FAILURE:
+    case OccurrenceTypes.DELETE_OCCURRENCE_FAILURE:
       return {
         ...state,
         error: action.payload,
       };
     case OccurrenceTypes.CREATE_OCCURRENCE_REQUEST:
+    case OccurrenceTypes.LIST_OCCURRENCES_REQUEST:
+    case OccurrenceTypes.UPDATE_OCCURRENCE_REQUEST:
+    case OccurrenceTypes.DELETE_OCCURRENCE_REQUEST:
       return {
         ...state,
         error: undefined,
@@ -167,40 +215,25 @@ export const occurrenceReducer = (
         data: [ ...state.data, action.payload ],
         error: undefined,
       };
-    case OccurrenceTypes.LIST_OCCURRENCES_FAILURE:
-      return {
-        ...state,
-        error: action.payload,
-      };
-    case OccurrenceTypes.LIST_OCCURRENCES_REQUEST:
-      return {
-        ...state,
-        error: undefined,
-      };
     case OccurrenceTypes.LIST_OCCURRENCES_SUCCESS:
       return {
         ...state,
         data: action.payload,
         error: undefined,
       };
-    case OccurrenceTypes.UPDATE_OCCURRENCE_FAILURE:
-      return {
-        ...state,
-        error: action.payload,
-      };
-    case OccurrenceTypes.UPDATE_OCCURRENCE_REQUEST:
-      return {
-        ...state,
-        error: undefined,
-      };
     case OccurrenceTypes.UPDATE_OCCURRENCE_SUCCESS:
       return {
         ...state,
-        data: state.data.map((occurrence) => {
-          if (occurrence.id === action.payload.id) return action.payload;
-          return occurrence;
-        }),
+        data: state.data.map((occurrence, ind, vector) => {
+          if(occurrence.id !== action.payload.id) return occurrence
+          else return ( vector.slice(ind, 1), action.payload ) }),
         error: undefined,
+      };
+    case OccurrenceTypes.DELETE_OCCURRENCE_SUCCESS:
+      return {
+        ...state,
+        error: undefined,
+        data: state.data.filter((occurrence) => occurrence.id !== action.payload),
       };
     default:
       return state;

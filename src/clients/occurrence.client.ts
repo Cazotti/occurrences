@@ -48,6 +48,12 @@ class OccurrenceClient {
     });
   }
 
+  delete(id: OccurrenceData['id']): Observable<HttpResponse<void, Headers>> {
+    return this.httpClient.delete({
+      url: `${OCCURRENCES_API_HOST}/occurrences/${id}`,
+    });
+  }
+
   findById(id: OccurrenceData['id']): Observable<HttpResponse<OccurrenceData, Headers>> {
     return this.httpClient.get({
       url: `${OCCURRENCES_API_HOST}/occurrences/${id}`,

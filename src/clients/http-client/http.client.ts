@@ -23,6 +23,9 @@ export interface HttpResponse<Body, Headers> {
 }
 
 export interface HttpClientAdapter {
+  delete(
+    args: HttpRequestArgs,
+  ): Observable<HttpResponse<Body, Headers>>;
   get(
     args: HttpRequestArgs,
   ): Observable<HttpResponse<Body, Headers>>;
@@ -43,6 +46,12 @@ export class HttpClient {
 
   constructor({ adapter }: HttpClientDependencies) {
     this.adapter = adapter;
+  }
+
+  delete<Body, Headers>(
+    args: HttpRequestArgs,
+  ): Observable<HttpResponse<Body, Headers>> {
+    return this.makeRequest('DELETE', args);
   }
 
   get<Body, Headers>(
@@ -70,6 +79,9 @@ export class HttpClient {
     let request: Observable<HttpResponse<Body, Headers>>;
 
     switch (method) {
+      case 'DELETE':
+        request = this.adapter.delete(args);
+        break;
       case 'GET':
         request = this.adapter.get(args);
         break;

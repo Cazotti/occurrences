@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar';
 
-import { occurrenceCreateRequestAction, OccurrenceState, occurrenceUpdateRequestAction} from '../redux/occurrences';
+import { occurrenceCreateRequestAction, occurrencesListRequestAction, OccurrenceState, occurrenceUpdateRequestAction} from '../redux/occurrences';
 import OccurrenceData from '../data-types/occurrence-data';
 
 interface Props {
   occurrence?: OccurrenceData;
   typeAction: string;
-  setOpenModal: any;
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function OccurrenceForm ({ occurrence, typeAction, setOpenModal }: Props) {
@@ -20,7 +20,7 @@ export default function OccurrenceForm ({ occurrence, typeAction, setOpenModal }
   const [code, setCode] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [registerAt, setRegisterAt] = useState<string>('');
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if(occurrence){
@@ -36,9 +36,10 @@ export default function OccurrenceForm ({ occurrence, typeAction, setOpenModal }
       <form className="form-occurrence" onSubmit={e => {
         e.preventDefault();
         occurrence ? dispatch(occurrenceUpdateRequestAction( {id: occurrence.id, code, description, registerAt } ))
-                   : dispatch(occurrenceCreateRequestAction( {code, description, registerAt }));
-        setOpenModal(false);
+                   : dispatch(occurrenceCreateRequestAction( {code, description, registerAt } ));
+        setTimeout(() => dispatch(occurrencesListRequestAction()), 500);
         setOpen(true);
+        setOpenModal(false);
       }}>
         <TextField
           variant="outlined"
@@ -57,7 +58,7 @@ export default function OccurrenceForm ({ occurrence, typeAction, setOpenModal }
           value={registerAt}
           fullWidth
           required
-          InputLabelProps={{ shrink: true, }}
+          InputLabelProps={{ shrink: true }}
           onChange={(e:ChangeEvent<HTMLInputElement>) => setRegisterAt(e.target.value)}
         />
         <TextField
@@ -67,7 +68,8 @@ export default function OccurrenceForm ({ occurrence, typeAction, setOpenModal }
           margin="normal"
           value={description}
           required
-          rowsMax={6}
+          rows={4}
+          rowsMax={4}
           multiline
           fullWidth
           onChange={(e:ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
@@ -81,16 +83,16 @@ export default function OccurrenceForm ({ occurrence, typeAction, setOpenModal }
         <Button
           style={{ width: '49%', margin: '0.5%'}}
           variant="contained"
-          onClick={() => {setOpenModal(false)}}
+          onClick={() => setOpenModal(false)}
         > Cancel</Button>
       </form>
       <Snackbar
         open={open}
         autoHideDuration={3000}
-        onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        { error ? ( <MuiAlert elevation={6} variant="filled" onClose={() => setOpen(false)} severity='error'>{error.message}</MuiAlert> )
-                : ( <MuiAlert elevation={6} variant="filled" onClose={() => setOpen(false)} severity='success'>Ocorrência salva com sucesso!</MuiAlert> ) }
+        onClose={() => setOpen(true)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >{ error ? ( <MuiAlert elevation={6} variant="filled" onClose={() => setOpen(true)} severity='error'>{error.message}</MuiAlert> )
+               : ( <MuiAlert elevation={6} variant="filled" onClose={() => setOpen(true)} severity='success'>Ocorrência salva com sucesso!</MuiAlert> ) }
       </Snackbar>
     </>
   )

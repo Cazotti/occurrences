@@ -14,6 +14,20 @@ axios.interceptors.request.use((config) => {
 });
 
 export class HttpClientSuperAgentAdapter implements HttpClientAdapter {
+  delete( args: HttpRequestArgs ): Observable<HttpResponse<Body, Headers>> {
+    const subject = new Subject<HttpResponse<Body, Headers>>();
+    const { url, headers } = args;
+
+    axios.delete( url, { headers } )
+      .then((res) => {
+        const { data: body, status, headers } = res;
+        subject.next({ body, status, headers });
+      })
+      .then(() => subject.complete())
+      .catch((err) => subject.error(err))
+    return subject.asObservable();
+  }
+
   get( args: HttpRequestArgs ): Observable<HttpResponse<Body, Headers>> {
     const subject = new Subject<HttpResponse<Body, Headers>>();
     const { url, headers } = args;

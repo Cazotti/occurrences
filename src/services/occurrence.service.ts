@@ -23,6 +23,10 @@ export class OccurrenceService {
     return this.occurrenceClient.create({ code, description, registerAt });
   }
 
+  delete(id: OccurrenceData['id']): Observable<HttpResponse<void, Headers>> {
+    return this.occurrenceClient.delete(id);
+  }
+
   listAll(): Observable<HttpResponse<OccurrenceData[], Headers>> {
     return this.occurrenceClient.listAll();
   }
