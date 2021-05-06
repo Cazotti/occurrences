@@ -12,12 +12,12 @@ export default function Login () {
   const dispatch = useDispatch();
 
   return (
-    <main className='main-login'>
-      {error && <p>{error.message}</p>}
-      <form onSubmit={e => {
+    <div className='div-login'>
+      <form className='form-login' onSubmit={e => {
         e.preventDefault();
         dispatch( signInRequestAction( {email, password} ) );
       } }>
+        {error && <p>{error.message}</p>}
         <TextField
           variant="outlined"
           type="email"
@@ -41,6 +41,6 @@ export default function Login () {
           type="submit"
         > Entrar </Button>
       </form>
-    </main>
+    </div>
   )
 }

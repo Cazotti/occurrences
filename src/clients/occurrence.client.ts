@@ -48,10 +48,24 @@ class OccurrenceClient {
     });
   }
 
+  findById(id: OccurrenceData['id']): Observable<HttpResponse<OccurrenceData, Headers>> {
+    return this.httpClient.get({
+      url: `${OCCURRENCES_API_HOST}/occurrences/${id}`,
+    })
+  }
+
   listAll(): Observable<HttpResponse<OccurrenceData[], Headers>> {
     return this.httpClient.get({
       url: `${OCCURRENCES_API_HOST}/occurrences`,
     });
+  }
+
+  update(data: OccurrenceData): Observable<HttpResponse<OccurrenceData, Headers>> {
+    const {id, ...body} = data;
+    return this.httpClient.patch({
+      url: `${OCCURRENCES_API_HOST}/occurrences/${id}`,
+      body
+    })
   }
 }
 

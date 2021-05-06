@@ -5,11 +5,9 @@ export interface AuthErrorAttributes {
 }
 
 export function AuthError(error: AuthErrorAttributes): string {
-  if (!error.response) {
-    return "";
-  }
   switch (error.response.status) {
     case 400:
+    case 401:
       return "E-mail ou senha incorretos.";
     default :
       return "Ocorreu um erro, tente novamente mais tarde."

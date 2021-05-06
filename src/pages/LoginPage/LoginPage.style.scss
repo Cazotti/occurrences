@@ -1,6 +1,15 @@
-.main-login {
+.div-login {
   align-items: center;
-  margin: 15%;
+  display: flex;
+  justify-content: center;
+}
+.form-login {
+  align-items: center;
+  background-color: #fff;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
+  height: 20em;
+  justify-content: center;
+  margin-top: 10%;
 }

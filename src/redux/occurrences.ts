@@ -60,19 +60,29 @@ const occurrenceCreateFailureAction = (error: OccurrenceErrorAttributes): Occurr
   payload: { message: OccurrenceError(error)},
 });
 
-const occurrencesListEpic: AppEpic<
-  OccurrencesListFailureAction | OccurrencesListRequestAction | OccurrencesListSuccessAction,
-  OccurrencesListFailureAction | OccurrencesListSuccessAction
-> = (action$, _, { occurrenceService }: {occurrenceService: OccurrenceService}) =>
-  action$.pipe(
-    filter(isOfType(OccurrenceTypes.LIST_OCCURRENCES_REQUEST)),
-    switchMap(() =>
-      occurrenceService.listAll().pipe(
-        map((res) => occurrencesListSuccessAction(res.body)),
-        catchError((err) => of(occurrencesListFailureAction(err))),
-      )
-    ),
-  )
+interface OccurrenceUpdateRequestAction extends Action<typeof OccurrenceTypes.UPDATE_OCCURRENCE_REQUEST> {
+  payload: OccurrenceData,
+}
+export const occurrenceUpdateRequestAction = (occurrence: OccurrenceData): OccurrenceUpdateRequestAction => ({
+  type: OccurrenceTypes.UPDATE_OCCURRENCE_REQUEST,
+  payload: occurrence,
+});
+
+interface OccurrenceUpdateSuccessAction extends Action<typeof OccurrenceTypes.UPDATE_OCCURRENCE_SUCCESS> {
+  payload: OccurrenceData,
+}
+export const occurrenceUpdateSuccessAction = (occurrence: OccurrenceData): OccurrenceUpdateSuccessAction => ({
+  type: OccurrenceTypes.UPDATE_OCCURRENCE_SUCCESS,
+  payload: occurrence,
+});
+
+interface OccurrenceUpdateFailureAction extends Action<typeof OccurrenceTypes.UPDATE_OCCURRENCE_FAILURE> {
+  payload: { message: String }
+}
+const occurrenceUpdateFailureAction = (error: OccurrenceErrorAttributes): OccurrenceUpdateFailureAction => ({
+  type: OccurrenceTypes.UPDATE_OCCURRENCE_FAILURE,
+  payload: { message: OccurrenceError(error)},
+});
 
 const occurrenceCreateEpic: AppEpic<
   OccurrenceCreateFailureAction | OccurrenceCreateRequestAction | OccurrenceCreateSuccessAction,
@@ -84,13 +94,42 @@ const occurrenceCreateEpic: AppEpic<
       occurrenceService.create(action.payload).pipe(
         map((res) => occurrenceCreateSuccessAction(res.body)),
         catchError((err) => of(occurrenceCreateFailureAction(err))),
-      )
+      ),
     ),
-  )
+  );
+
+const occurrencesListEpic: AppEpic<
+  OccurrencesListFailureAction | OccurrencesListRequestAction | OccurrencesListSuccessAction,
+  OccurrencesListFailureAction | OccurrencesListSuccessAction
+> = (action$, _, { occurrenceService }: {occurrenceService: OccurrenceService}) =>
+  action$.pipe(
+    filter(isOfType(OccurrenceTypes.LIST_OCCURRENCES_REQUEST)),
+    switchMap(() =>
+      occurrenceService.listAll().pipe(
+        map((res) => occurrencesListSuccessAction(res.body)),
+        catchError((err) => of(occurrencesListFailureAction(err))),
+      ),
+    ),
+  );
+
+const occurrenceUpdateEpic: AppEpic<
+  OccurrenceUpdateFailureAction | OccurrenceUpdateRequestAction | OccurrenceUpdateSuccessAction,
+  OccurrenceUpdateFailureAction | OccurrenceUpdateSuccessAction
+> = (action$, _, { occurrenceService }: {occurrenceService: OccurrenceService}) =>
+  action$.pipe(
+    filter(isOfType(OccurrenceTypes.UPDATE_OCCURRENCE_REQUEST)),
+    switchMap((action) =>
+      occurrenceService.update(action.payload).pipe(
+        map((res) => occurrenceUpdateSuccessAction(res.body)),
+        catchError(err => of(occurrenceUpdateFailureAction(err))),
+      ),
+    ),
+  );
 
 export const occurrenceEpic = combineEpics<AppEpic>(
-  occurrencesListEpic,
   (occurrenceCreateEpic as any) as AppEpic,
+  occurrencesListEpic,
+  (occurrenceUpdateEpic as any) as AppEpic,
 );
 
 const initialState: OccurrenceState = {
@@ -107,6 +146,9 @@ export const occurrenceReducer = (
     | OccurrencesListFailureAction
     | OccurrencesListRequestAction
     | OccurrencesListSuccessAction
+    | OccurrenceUpdateFailureAction
+    | OccurrenceUpdateRequestAction
+    | OccurrenceUpdateSuccessAction
 ) => {
   switch (action.type) {
     case OccurrenceTypes.CREATE_OCCURRENCE_FAILURE:
@@ -139,6 +181,25 @@ export const occurrenceReducer = (
       return {
         ...state,
         data: action.payload,
+        error: undefined,
+      };
+    case OccurrenceTypes.UPDATE_OCCURRENCE_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      };
+    case OccurrenceTypes.UPDATE_OCCURRENCE_REQUEST:
+      return {
+        ...state,
+        error: undefined,
+      };
+    case OccurrenceTypes.UPDATE_OCCURRENCE_SUCCESS:
+      return {
+        ...state,
+        data: state.data.map((occurrence) => {
+          if (occurrence.id === action.payload.id) return action.payload;
+          return occurrence;
+        }),
         error: undefined,
       };
     default:

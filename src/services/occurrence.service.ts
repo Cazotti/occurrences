@@ -26,6 +26,25 @@ export class OccurrenceService {
   listAll(): Observable<HttpResponse<OccurrenceData[], Headers>> {
     return this.occurrenceClient.listAll();
   }
+
+  update({
+    id,
+    code,
+    description,
+    registerAt
+  }: {
+    id: number;
+    code: string;
+    description: string;
+    registerAt: string;
+  }): Observable<HttpResponse<OccurrenceData, Headers>> {
+    try {
+      this.occurrenceClient.update({ id, code, description, registerAt });
+      return  this.occurrenceClient.findById(id);
+    } catch (error) {
+      return new error(error);
+    }
+  }
 }
 
 export default OccurrenceService;

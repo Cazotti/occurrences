@@ -24,10 +24,13 @@ export interface HttpResponse<Body, Headers> {
 
 export interface HttpClientAdapter {
   get(
-    opt: HttpRequestArgs,
+    args: HttpRequestArgs,
+  ): Observable<HttpResponse<Body, Headers>>;
+  patch(
+    args: HttpRequestArgs,
   ): Observable<HttpResponse<Body, Headers>>;
   post(
-    opt: HttpRequestArgs,
+    args: HttpRequestArgs,
   ): Observable<HttpResponse<Body, Headers>>;
 }
 
@@ -48,6 +51,12 @@ export class HttpClient {
     return this.makeRequest('GET', args);
   }
 
+  patch<Body, Headers>(
+    args: HttpRequestArgs,
+  ): Observable<HttpResponse<Body, Headers>> {
+    return this.makeRequest('PATCH', args);
+  }
+
   post<Body, Headers>(
     args: HttpRequestArgs,
   ): Observable<HttpResponse<Body, Headers>> {
@@ -61,11 +70,14 @@ export class HttpClient {
     let request: Observable<HttpResponse<Body, Headers>>;
 
     switch (method) {
-      case 'POST':
-        request = this.adapter.post(args);
-        break;
       case 'GET':
         request = this.adapter.get(args);
+        break;
+      case 'PATCH':
+        request = this.adapter.patch(args);
+        break;
+      case 'POST':
+        request = this.adapter.post(args);
         break;
       default:
         throw Error(`Unknown method HTTP method '${method}'`);

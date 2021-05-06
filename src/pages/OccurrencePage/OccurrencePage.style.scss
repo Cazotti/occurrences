@@ -1,14 +1,22 @@
-main {
-  align-items: center;
-  display: flex;
-  flex-direction:row;
-  margin: 5% 10% 10% 10%;
-}
-
 form {
   padding: 40px;
   height: 30em;
+  margin-bottom: 0%;
   width: 40em;
+}
+
+.main-data-grid {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin: 5% 10% 10% 10%;
+}
+
+.div-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .nav-bar-header {
